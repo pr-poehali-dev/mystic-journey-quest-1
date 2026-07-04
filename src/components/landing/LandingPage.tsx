@@ -1,11 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useSpring } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import Section from './Section'
 import Layout from './Layout'
 import { sections } from './sections'
+import AuthDialog from '@/components/AuthDialog'
 
 export default function LandingPage() {
   const [activeSection, setActiveSection] = useState(0)
+  const [authOpen, setAuthOpen] = useState(false)
+  const navigate = useNavigate()
+
+  const handleButtonClick = (action?: 'auth' | 'explore') => {
+    if (action === 'explore') navigate('/explore')
+    else setAuthOpen(true)
+  }
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ container: containerRef })
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 })
@@ -43,6 +52,23 @@ export default function LandingPage() {
 
   return (
     <Layout>
+      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
+      <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-12 py-5">
+        <button onClick={() => navigate('/')} className="text-white font-bold tracking-widest text-lg">
+          PLAYERS <span className="text-[#FF4D00]">LIVE</span>
+        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/explore')} className="hidden sm:block text-neutral-300 hover:text-white text-sm">
+            Обзор
+          </button>
+          <button onClick={() => navigate('/channel/a1')} className="hidden sm:block text-neutral-300 hover:text-white text-sm">
+            Мой канал
+          </button>
+          <button onClick={() => setAuthOpen(true)} className="text-[#FF4D00] border border-[#FF4D00] rounded-md px-4 py-1.5 text-sm hover:bg-[#FF4D00] hover:text-black transition-colors">
+            Войти
+          </button>
+        </div>
+      </header>
       <nav className="fixed top-0 right-0 h-screen flex flex-col justify-center z-30 p-4">
         {sections.map((section, index) => (
           <button
@@ -67,6 +93,7 @@ export default function LandingPage() {
             key={section.id}
             {...section}
             isActive={index === activeSection}
+            onButtonClick={handleButtonClick}
           />
         ))}
       </div>
